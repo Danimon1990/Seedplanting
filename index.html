@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seed Manager</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .seed-list {
+            margin-top: 20px;
+        }
+        .seed-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .seed-item:hover {
+            background: #eaeaea;
+        }
+        .add-seed-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+        }
+        .add-seed-btn:hover {
+            background-color: #218838;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            z-index: 1000;
+        }
+        .modal.show {
+            display: block;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .modal-overlay.show {
+            display: block;
+        }
+        .modal input {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .modal button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .modal button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Seed Manager</h1>
+    <div class="seed-list" id="seedList">
+        <!-- Seed items will be displayed here -->
+    </div>
+
+    <button class="add-seed-btn" id="addSeedBtn">+</button>
+
+    <!-- Modal for adding a new seed batch -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="modal" id="addSeedModal">
+        <h2>Add New Seed Batch</h2>
+        <input type="text" id="seedVariety" placeholder="Seed Variety">
+        <input type="number" id="numberOfSeeds" placeholder="Number of Seeds">
+        <input type="date" id="seedStartDate" placeholder="Start Date">
+        <input type="text" id="seedLocation" placeholder="Location">
+        <input type="text" id="soilUsed" placeholder="Soil Used">
+        <button id="saveSeedBtn">Save</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const seedList = document.getElementById("seedList");
+            const addSeedBtn = document.getElementById("addSeedBtn");
+            const addSeedModal = document.getElementById("addSeedModal");
+            const modalOverlay = document.getElementById("modalOverlay");
+            const saveSeedBtn = document.getElementById("saveSeedBtn");
+
+            const seedVarietyInput = document.getElementById("seedVariety");
+            const numberOfSeedsInput = document.getElementById("numberOfSeeds");
+            const seedStartDateInput = document.getElementById("seedStartDate");
+            const seedLocationInput = document.getElementById("seedLocation");
+            const soilUsedInput = document.getElementById("soilUsed");
+
+            // Fetch and Render Seeds
+            const fetchSeeds = async () => {
+                try {
+                    const response = await fetch("http://localhost:3000/seeds");
+                    const seeds = await response.json();
+                    renderSeedList(seeds);
+                } catch (error) {
+                    console.error("Error fetching seeds:", error);
+                }
+            };
+
+            const renderSeedList = (seeds) => {
+                seedList.innerHTML = seeds
+                    .map(
+                        (seed) => `
+                        <div class="seed-item">
+                            <strong>${seed.seedVariety}</strong><br>
+                            Number: ${seed.numberOfSeeds}<br>
+                            Planted: ${seed.seedStartDate}<br>
+                            Location: ${seed.seedLocation}<br>
+                            Soil: ${seed.soilUsed}
+                        </div>
+                    `
+                    )
+                    .join("");
+            };
+
+            // Add Seed Button Click
+            addSeedBtn.addEventListener("click", () => {
+                addSeedModal.classList.add("show");
+                modalOverlay.classList.add("show");
+            });
+
+            // Save Seed Button Click
+            saveSeedBtn.addEventListener("click", async () => {
+                const newSeed = {
+                    seedVariety: seedVarietyInput.value,
+                    numberOfSeeds: numberOfSeedsInput.value,
+                    seedStartDate: seedStartDateInput.value,
+                    seedLocation: seedLocationInput.value,
+                    soilUsed: soilUsedInput.value,
+                };
+
+                try {
+                    const response = await fetch("http://localhost:3000/seeds", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(newSeed),
+                    });
+
+                    if (response.ok) {
+                        fetchSeeds();
+                        seedVarietyInput.value = "";
+                        numberOfSeedsInput.value = "";
+                        seedStartDateInput.value = "";
+                        seedLocationInput.value = "";
+                        soilUsedInput.value = "";
+                        addSeedModal.classList.remove("show");
+                        modalOverlay.classList.remove("show");
+                    } else {
+                        console.error("Failed to save seed.");
+                    }
+                } catch (error) {
+                    console.error("Error saving seed:", error);
+                }
+            });
+
+            // Modal Overlay Click
+            modalOverlay.addEventListener("click", () => {
+                addSeedModal.classList.remove("show");
+                modalOverlay.classList.remove("show");
+            });
+
+            // Initial Fetch
+            fetchSeeds();
+        });
+    </script>
+</body>
+</html>

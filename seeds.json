@@ -1,0 +1,23 @@
+[
+  {
+    "seedVariety": "ndndnds",
+    "numberOfSeeds": "",
+    "seedStartDate": "",
+    "seedLocation": "",
+    "soilUsed": ""
+  },
+  {
+    "seedVariety": "cookies",
+    "numberOfSeeds": "200",
+    "seedStartDate": "2025-01-16",
+    "seedLocation": "Cold",
+    "soilUsed": ""
+  },
+  {
+    "seedVariety": "cheese",
+    "numberOfSeeds": "200",
+    "seedStartDate": "2025-01-17",
+    "seedLocation": "Cuul",
+    "soilUsed": ""
+  }
+]
