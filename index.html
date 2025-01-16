@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Seed Manager</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
@@ -113,6 +113,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            const backendUrl = "https://seedplanting.onrender.com/seeds";
             const seedList = document.getElementById("seedList");
             const addSeedBtn = document.getElementById("addSeedBtn");
             const addSeedModal = document.getElementById("addSeedModal");
@@ -124,15 +125,15 @@
             const seedStartDateInput = document.getElementById("seedStartDate");
             const seedLocationInput = document.getElementById("seedLocation");
             const soilUsedInput = document.getElementById("soilUsed");
-
-            // Fetch and Render Seeds
+            
             const fetchSeeds = async () => {
                 try {
-                    const response = await fetch("http://localhost:3000/seeds");
+                    const response = await fetch(backendUrl);
+                    if (!response.ok) throw new Error(response.statusText);
                     const seeds = await response.json();
                     renderSeedList(seeds);
                 } catch (error) {
-                    console.error("Error fetching seeds:", error);
+                    console.error("Error fetching seeds:", error.message || error);
                 }
             };
 
@@ -141,11 +142,13 @@
                     .map(
                         (seed) => `
                         <div class="seed-item">
-                            <strong>${seed.seedVariety}</strong><br>
-                            Number: ${seed.numberOfSeeds}<br>
-                            Planted: ${seed.seedStartDate}<br>
-                            Location: ${seed.seedLocation}<br>
-                            Soil: ${seed.soilUsed}
+                            <strong>${seed.seedVariety || "Unnamed Batch"}</strong><br>
+                            Number of Seeds: ${seed.numberOfSeeds || seed.seedsPlanted}<br>
+                            Planted: ${seed.seedStartDate ? new Date(seed.seedStartDate * 1000).toLocaleDateString() : "Unknown"}<br>
+                            Location: ${seed.seedLocation || "Not Specified"}<br>
+                            Soil: ${seed.soilUsed || "Unknown"}<br>
+                            Pot Size: ${seed.potSize || "N/A"}<br>
+                            Active: ${seed.isActive ? "Yes" : "No"}
                         </div>
                     `
                     )
@@ -162,21 +165,28 @@
             saveSeedBtn.addEventListener("click", async () => {
                 const newSeed = {
                     seedVariety: seedVarietyInput.value,
-                    numberOfSeeds: numberOfSeedsInput.value,
-                    seedStartDate: seedStartDateInput.value,
+                    numberOfSeeds: parseInt(numberOfSeedsInput.value, 10),
+                    seedStartDate: Math.floor(new Date(seedStartDateInput.value).getTime() / 1000), // Convert to UNIX timestamp
                     seedLocation: seedLocationInput.value,
                     soilUsed: soilUsedInput.value,
+                    potSize: "Default Size", // Add a default or new input for pot size
+                    isActive: true,
+                    type: "Seed Batch",
+                    beds: [[]],
+                    activities: [],
+                    observations: [],
+                    id: crypto.randomUUID(), // Generate unique ID
                 };
 
                 try {
-                    const response = await fetch("http://localhost:3000/seeds", {
+                    const response = await fetch(backendUrl, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(newSeed),
                     });
 
                     if (response.ok) {
-                        fetchSeeds();
+                        fetchSeeds(); // Reload the seed list
                         seedVarietyInput.value = "";
                         numberOfSeedsInput.value = "";
                         seedStartDateInput.value = "";
@@ -185,10 +195,10 @@
                         addSeedModal.classList.remove("show");
                         modalOverlay.classList.remove("show");
                     } else {
-                        console.error("Failed to save seed.");
+                        console.error("Failed to save seed:", response.statusText);
                     }
                 } catch (error) {
-                    console.error("Error saving seed:", error);
+                    console.error("Error saving seed batch:", error.message || error);
                 }
             });
 

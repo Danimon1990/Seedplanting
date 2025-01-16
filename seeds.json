@@ -1,23 +1,23 @@
 [
-  {
-    "seedVariety": "ndndnds",
-    "numberOfSeeds": "",
-    "seedStartDate": "",
-    "seedLocation": "",
-    "soilUsed": ""
-  },
-  {
-    "seedVariety": "cookies",
-    "numberOfSeeds": "200",
-    "seedStartDate": "2025-01-16",
-    "seedLocation": "Cold",
-    "soilUsed": ""
-  },
-  {
-    "seedVariety": "cheese",
-    "numberOfSeeds": "200",
-    "seedStartDate": "2025-01-17",
-    "seedLocation": "Cuul",
-    "soilUsed": ""
-  }
+    {
+        "numberOfSeeds": 200,
+        "beds": [[]],
+        "type": "Seed Batch",
+        "sectionLength": 0,
+        "sectionWidth": 0,
+        "seedStartDate": 1737054801.525425,
+        "observations": [],
+        "seedVariety": "Prairie moon ",
+        "id": "A9DC8351-4DB8-4BA4-A1FF-A6433479FB9A",
+        "seedsPlanted": 200,
+        "sections": [],
+        "seedLocation": "Cold",
+        "isActive": true,
+        "soilUsed": "Mix",
+        "activities": [],
+        "expectedHarvestDate": 1737054801.525398,
+        "potSize": "128.0 inches",
+        "name": "Sunflower"
+    }
+
 ]
